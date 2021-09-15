@@ -5,6 +5,8 @@ from tqdm import tqdm
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 import yaml
+import pickle
+import random
 
 
 class ZincDistributor:
@@ -89,9 +91,9 @@ class ZincDistributor:
         Save the bins of SMILES into a yaml file.
         """
         print(f'saving the bins to {out_path}...')
-        with open(out_path, "w") as f:
-            yaml.dump(self.bins, f)
-
+        with open(out_path, "wb") as f:
+            #yaml.dump(self.bins, f)
+            pickle.dump(self.bins, f)
 
 class ZincSampler:
     """
@@ -100,34 +102,29 @@ class ZincSampler:
     returns a list of smiles
     """
     def __init__(self, zinc_path):
-        pass
+        # load bins of molecules
+        with open(zinc_path, 'rb') as f:
+            #bins = yaml.full_load(f)
+            self.bins = pickle.load(f)
 
-    def sample(self, mol_weights):
+    def sample_mols(self, smiles_list):
         """
         Sample from the bins according to the input molecular weights.
         mol_weights - list of integers
         """
-        sampled = []
-        for mol_weight in mol_weights:
-            if mol_weight < 250:
-                bin_id = 0   
-            elif 250 <= mol_weight < 300:
-                bin_id = 1
-            elif 300 <= mol_weight < 325:
-                bin_id = 2
-            elif 325 <= mol_weight < 350:
-                bin_id = 3
-            elif 350 <= mol_weight < 375:
-                bin_id = 4
-            elif 375 <= mol_weight < 400:
-                bin_id = 5
-            elif 400 <= mol_weight < 425:
-                bin_id = 6
-            elif 425 <= mol_weight < 450:
-                bin_id = 7
-            elif 450 <= mol_weight:
-                bin_id = 8
+        # compute the molecular weights
+        mol_weights = smiles_to_weights(smiles_list)
 
+        # calculate the count of each bin
+        counts = count_mol_weights(mol_weights)
+
+        # sample from each bin according to the counts
+        sampled = []
+        for i, cnt in enumerate(counts):
+            sampled.extend(random.sample(self.bins[i], cnt))
+
+        return sampled
+        
 
 def count_mol_weights(mol_weights):
     """
