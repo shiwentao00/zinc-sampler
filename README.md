@@ -31,5 +31,5 @@ in_smiles = [
     'COC(=O)[C@H]1Cc2cc(C[C@H](C)NC[C@H](O)c3cccc(Cl)c3)ccc2N1C(=Oc1ccccc1',
     'O[C@@H]1C=C2CCN3Cc4cc5c(cc4[C@H]([C@H]1O)[C@H]23)OCO5',
 ]
-sampled = smiles_to_weights(in_smiles)
+sampled = sampler.sample_mols(in_smiles)
 ```
